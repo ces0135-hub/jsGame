@@ -25,10 +25,10 @@ ctx.stroke();  //테두리 나태내기
 ctx.closePath();
 */
 var x = canvas.width/2;  //시작할 x 좌표 지정
-var y = canvas.height-30;  //시작할 y 좌표 지정
+var y = canvas.height/2;  //시작할 y 좌표 지정
 
 var dx = 2;
-var dy = -2;
+var dy = -2;  //y는 왼쪽 위부터 시작하므로, -2는 감소하는 것은 원의 중심을 위로 2만큼 이동하는 것이다.
 
 var ballRadius = 10;  //생성할 원의 radius
 
@@ -63,30 +63,9 @@ function drawPaddle() {
 function draw() {
     //clearRect(top left 시작 x좌표, top left 시작 y좌표, bottom right x 좌표, bottom right y 좌표);
     ctx.clearRect(0, 0, canvas.width, canvas.height);  //canvas의 전체 영역을 지우는 코드
-    if(y + dy < 0 + ballRadius || y + dy > canvas.height - ballRadius) {  //coordinate system starts form the top left
-        //y + dy < 0 means 위로 벗어난 경우
-        //y + dy > canvas.hieght means 아래로 벗어난 경우
-        //y + dy > canvas.height - ballRadius: 원래의 canvas 경계에서 ballRadius만큼 줄은 부분이 경계가 된다.
-        //이렇게 하면 ball의 절반이 경계 속에 들어갔다가 방향을 바꾼다.
-        //ballRadius를 이용해서 수정한다.
-        dy = -dy;
-        ctx.fillStyle = "#" + Math.round(Math.random() * 0xffffff).toString(16);  //random으로 색 바꾸기
-    }
 
-    if(x + dx < 0 + ballRadius || x + dx > canvas.width - ballRadius) {
-        //x + dx < 0 means 왼쪽으로 벗어난 경우
-        //x + dx > canvas.hieght means 오른쪽으로 벗어난 경우
-        //이렇게 하면 ball의 절반이 경계 속에 들어갔다가 방향을 바꾼다.
-        //ballRadius를 이용해서 수정한다.
-        dx = -dx;
-        ctx.fillStyle = "#" + Math.round(Math.random() * 0xffffff).toString(16);
-    }
-    
-    drawBall();
-    
-    x += dx;
-    y += dy;
-    //paddleHeight는 위에서부터 몇 픽셀
+    drawPaddle();
+
     if(rightPressed) {
         paddleX += 2;
         if (paddleX + paddleWidth > canvas.width){
@@ -113,7 +92,82 @@ function draw() {
             paddleHeight = fixedPaddleHeight;  //paddleHeight = canvas.height(맨 위)
         }
     }
-    drawPaddle();
+    //key 입력에 따른 paddle 이동
+
+
+    if(y + dy < 0 + ballRadius || y + dy > canvas.height - ballRadius) {  //coordinate system starts form the top left
+        //y + dy < 0 means 위로 벗어난 경우
+        //y + dy > canvas.hieght means 아래로 벗어난 경우
+        //y + dy > canvas.height - ballRadius: 원래의 canvas 경계에서 ballRadius만큼 줄은 부분이 경계가 된다.
+        //이렇게 하면 ball의 절반이 경계 속에 들어갔다가 방향을 바꾼다.
+        //ballRadius를 이용해서 수정한다.
+        dy = -dy;
+        //ctx.fillStyle = "#" + Math.round(Math.random() * 0xffffff).toString(16);  //random으로 색 바꾸기
+    } else if(x > paddleX - ballRadius && x < paddleX + paddleWidth - ballRadius && y > canvas.height-paddleHeight-fixedPaddleHeight && y < canvas.height-paddleHeight+ballRadius) {
+        dy = -dy;
+        //paddle에 부딪히면 방향이 바뀐다.
+    }
+    if(y + dy == canvas.height - ballRadius) {
+        alert("Game Over");
+        document.location.reload();
+        clearInterval(interval);
+    }
+    
+    if(x + dx < 0 + ballRadius || x + dx > canvas.width - ballRadius) {
+        //x + dx < 0 means 왼쪽으로 벗어난 경우
+        //x + dx > canvas.hieght means 오른쪽으로 벗어난 경우
+        //이렇게 하면 ball의 절반이 경계 속에 들어갔다가 방향을 바꾼다.
+        //ballRadius를 이용해서 수정한다.
+        dx = -dx;
+        //ctx.fillStyle = "#" + Math.round(Math.random() * 0xffffff).toString(16);
+    }
+    //원의 테두리가 canvas를 벗어나면 방향을 바꾸는 코드
+
+    
+    drawBall();
+    //drawPaddle();
+
+    //x += dx;
+    //y += dy;
+    //움직인 원의 중심
+
+    //paddleHeight는 위에서부터 몇 픽셀
+ /*   if(rightPressed) {
+        paddleX += 2;
+        if (paddleX + paddleWidth > canvas.width){
+            paddleX = canvas.width - paddleWidth;
+        }
+    }
+    else if(leftPressed) {
+        paddleX -= 2;
+        if (paddleX < 0){
+            paddleX = 0;
+        }
+    }
+    else if(upPressed) {//올리기
+        paddleHeight += 2;  //paddle 올리기(paddle의 왼쪽 위 y 좌표 = canvas.height - paddleHeight가 감소하므로 위로 올라간다.)
+        //ctx.rect(paddleX, canvas.height-paddleHeight, paddleWidth, fixedPaddleHeight);
+        if(paddleHeight >= canvas.height) {
+            paddleHeight = canvas.height;  //paddleHeight = 0(맨 아래)
+        }
+    }
+    else if(downPressed) {//내리기
+        paddleHeight -= 2
+        //ctx.rect(paddleX, canvas.height-paddleHeight, paddleWidth, fixedPaddleHeight);
+        if(paddleHeight <= fixedPaddleHeight) {
+            paddleHeight = fixedPaddleHeight;  //paddleHeight = canvas.height(맨 위)
+        }
+    }
+*/
+    //원과 paddle이 만나는 경우
+    //원의 중심: (x, y), radius: ballRadius
+    //paddleWidth, fixedPaddleHeight: paddle의 길이, 높이
+    //rect(paddleX, canvas.height-paddleHeight, paddleWidth, fixedPaddleHeight);
+    //원과 paddle이 만나는 경우
+    
+
+    x += dx;
+    y += dy;
 }
 
 document.addEventListener('keydown', keyDownHandler, false);  //keydown: key is pressed
@@ -143,4 +197,4 @@ function keyUpHandler(e) {
     }
 }
 
-setInterval(draw, 10);  //새로 고침할 때마다 500millSec 후에 호출 된다.
+var interval = setInterval(draw, 10);  //새로 고침할 때마다 10millSec 후에 호출 된다.
