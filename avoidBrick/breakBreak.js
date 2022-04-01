@@ -64,15 +64,14 @@ function drawBrick() {
     }
 }
 
-function collDec() {  //수정 필요
+function collDec() {
     for(var c = 0; c < brickColCount; c++) {
         for(var r = 0; r < brickRowCount; r++) {
             let curBrick = brick[c][r];
             if(curBrick.status == 1) {
-                if(ballX > curBrick.setBrickX && ballX < curBrick.setBrickX+brickWidth && ballY > curBrick.brickY && ballY < curBrick.ballRadius+brickHeight) {
+                if(ballX > curBrick.setBrickX && ballX < curBrick.setBrickX+brickWidth && ballY > curBrick.setBrickY && ballY < curBrick.setBrickY+brickHeight) {
                     dy = -dy;
                     curBrick.status = 0;
-                    alert(curBrick.status);
                 }
             }
         }
