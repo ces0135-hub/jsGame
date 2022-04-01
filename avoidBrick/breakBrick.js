@@ -23,7 +23,7 @@ let downPressed = false;
 
 
 
-let brickColCount = 10;
+let brickColCount = 4;
 let brickRowCount = 2;
 
 let brickPadding = 10;
@@ -35,11 +35,11 @@ let brickOffsetTop = 30;
 let brickX = 0;
 let brickY = 0;
 
-let brick = [];
+let brick = [];  //생성되는 brick의 정보(시작 좌표, stataus)를 저장하는 배열
 for(var c = 0; c < brickColCount; c++) {
     brick[c] = [];
     for(var r = 0; r < brickRowCount; r++) {
-        brick[c][r] = { setBrickX: 0, setBrickY: 0, status: 1 };
+        brick[c][r] = { setBrickX: 0, setBrickY: 0, status: 1 };  //status가 0이면 invisible, 1이면 visible 하다.
     }
 }
 
@@ -64,6 +64,7 @@ function drawBrick() {
     }
 }
 
+
 function collDec() {
     for(var c = 0; c < brickColCount; c++) {
         for(var r = 0; r < brickRowCount; r++) {
@@ -77,6 +78,7 @@ function collDec() {
         }
     }
 }
+
 
 function paddleDec() {
     if(ballX > paddleX && ballX < paddleX+paddleWidth && ballY < canvas.height-paddleHeight && ballY > canvas.height-paddleHeight-fixedPaddleHeight) {
@@ -99,6 +101,37 @@ function drawPaddle() {
     ctx.fillStyle = "#460B44";
     ctx.fill();
     ctx.closePath();
+}
+
+
+let statusCnt = 0;
+function brokenBrickCnt() {
+    for(var c = 0; c < brickColCount; c++) {
+        for(var r = 0; r < brickRowCount; r++) {
+            if(brick[c][r].status == 0) {  //부서진 brick의 개수
+                statusCnt += 1;
+            }
+        }
+    }
+}
+
+
+let groundTouch = 0;
+function groundCnt() {
+    if(ballY-ballRadius < 0) {
+        groundTouch += 1;
+    }
+}
+
+
+function gameOver() {
+    if(statusCnt == brickColCount*brickRowCount || groundTouch >= 2) {
+        statusCnt = 0;
+        groundTouch = 0;
+        alert("Game Over");
+        document.location.reload();
+        clearInterval(interval);
+    }
 }
 
 
@@ -149,6 +182,20 @@ function draw() {
 
     ballX += dx;
     ballY += dy;
+
+    brokenBrickCnt();
+    groundCnt();
+
+    if(statusCnt == brickColCount*brickRowCount) {
+        alert("Brick");
+        document.location.reload();
+        clearInterval(interval);
+    } 
+    if(groundTouch >= 2) {
+        alert("ground");
+        document.location.reload();
+        clearInterval(interval);
+    }
 }
 
 document.addEventListener('keydown', keyDownHandler, false);
