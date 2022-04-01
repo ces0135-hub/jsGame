@@ -42,6 +42,42 @@ var leftPressed = false;
 var downPressed = false;
 var upPressed = false;
 
+var brickRowCount = 1;  //행의 수
+var brickColumnCount = 2;  //열의 수
+var brickWidth = 75;  //brick 길이
+var brickHeight = 20;  //brick 높이
+var brickPadding = 10;  //brick 간의 간격
+var brickOffsetTop = 30;
+var brickOffsetLeft = 30;
+
+var brick = [];  //brick의 좌표를 담을 배열
+for(var c = 0; c < brickColumnCount; c++) {
+    brick[c] = [];
+    for(var r = 0; r < brickRowCount; r++) {
+        brick[c][r] = { x: 0, y: 0, status: 1 };
+    }
+}
+
+function drawBricks() {
+    for(var c = 0; c < brickColumnCount; c++) {
+        for(var r = 0; r < brickRowCount; r++) {
+            if(brick[c][r].status == 1) {
+                var brickX = c * (brickWidth + brickPadding) + brickOffsetLeft;
+                var brickY = r * (brickHeight + brickPadding) + brickOffsetTop;
+                brick[c][r].x = brickX;
+                brick[c][r].y = brickY;
+
+                ctx.beginPath()
+                ctx.rect(brickX, brickY, brickWidth, brickHeight);
+                ctx.fillStyle = "black";
+                ctx.fill();
+                ctx.closePath();
+            }
+        }
+    }
+}
+
+
 function drawBall() {
     ctx.beginPath();
     ctx.arc(x, y, ballRadius, 0, Math.PI*2);
@@ -63,9 +99,9 @@ function drawPaddle() {
 function draw() {
     //clearRect(top left 시작 x좌표, top left 시작 y좌표, bottom right x 좌표, bottom right y 좌표);
     ctx.clearRect(0, 0, canvas.width, canvas.height);  //canvas의 전체 영역을 지우는 코드
-
     drawPaddle();
-
+    
+    
     if(rightPressed) {
         paddleX += 2;
         if (paddleX + paddleWidth > canvas.width){
@@ -102,7 +138,6 @@ function draw() {
         //이렇게 하면 ball의 절반이 경계 속에 들어갔다가 방향을 바꾼다.
         //ballRadius를 이용해서 수정한다.
         dy = -dy;
-        //ctx.fillStyle = "#" + Math.round(Math.random() * 0xffffff).toString(16);  //random으로 색 바꾸기
     } else if(x > paddleX - ballRadius && x < paddleX + paddleWidth - ballRadius && y > canvas.height-paddleHeight-fixedPaddleHeight && y < canvas.height-paddleHeight+ballRadius) {
         dy = -dy;
         //paddle에 부딪히면 방향이 바뀐다.
@@ -119,59 +154,19 @@ function draw() {
         //이렇게 하면 ball의 절반이 경계 속에 들어갔다가 방향을 바꾼다.
         //ballRadius를 이용해서 수정한다.
         dx = -dx;
-        //ctx.fillStyle = "#" + Math.round(Math.random() * 0xffffff).toString(16);
     }
     //원의 테두리가 canvas를 벗어나면 방향을 바꾸는 코드
-
     
     drawBall();
-    //drawPaddle();
-
-    //x += dx;
-    //y += dy;
-    //움직인 원의 중심
-
-    //paddleHeight는 위에서부터 몇 픽셀
- /*   if(rightPressed) {
-        paddleX += 2;
-        if (paddleX + paddleWidth > canvas.width){
-            paddleX = canvas.width - paddleWidth;
-        }
-    }
-    else if(leftPressed) {
-        paddleX -= 2;
-        if (paddleX < 0){
-            paddleX = 0;
-        }
-    }
-    else if(upPressed) {//올리기
-        paddleHeight += 2;  //paddle 올리기(paddle의 왼쪽 위 y 좌표 = canvas.height - paddleHeight가 감소하므로 위로 올라간다.)
-        //ctx.rect(paddleX, canvas.height-paddleHeight, paddleWidth, fixedPaddleHeight);
-        if(paddleHeight >= canvas.height) {
-            paddleHeight = canvas.height;  //paddleHeight = 0(맨 아래)
-        }
-    }
-    else if(downPressed) {//내리기
-        paddleHeight -= 2
-        //ctx.rect(paddleX, canvas.height-paddleHeight, paddleWidth, fixedPaddleHeight);
-        if(paddleHeight <= fixedPaddleHeight) {
-            paddleHeight = fixedPaddleHeight;  //paddleHeight = canvas.height(맨 위)
-        }
-    }
-*/
-    //원과 paddle이 만나는 경우
-    //원의 중심: (x, y), radius: ballRadius
-    //paddleWidth, fixedPaddleHeight: paddle의 길이, 높이
-    //rect(paddleX, canvas.height-paddleHeight, paddleWidth, fixedPaddleHeight);
-    //원과 paddle이 만나는 경우
-    
+    drawBricks();
+    collisionDetection();
 
     x += dx;
     y += dy;
 }
 
 document.addEventListener('keydown', keyDownHandler, false);  //keydown: key is pressed
-document.addEventListener('keyup', keyUpHandler, false);  //keup: done pressong key
+document.addEventListener('keyup', keyUpHandler, false);  //keup: done pressing key
 
 function keyDownHandler(e) {
     if(e.key == 'Right' || e.key == 'ArrowRight') {
@@ -194,6 +189,22 @@ function keyUpHandler(e) {
         upPressed = false;
     } else if(e.key == 'Down' || e.key == 'ArrowDown') {
         downPressed = false;
+    }
+}
+
+function collisionDetection() {
+    for(var c = 0; c < brickColumnCount; c++) {
+        for(var r = 0; r < brickRowCount; r++) {
+            var b = brick[c][r];
+
+            if(b.status == 1) {
+                if(x > b.x && x < b.x + brickWidth || x > b.y && x < b.y + brickHeight) {
+                    dy = -dy;
+                    b.status = 0;
+                    alert("detected");
+                }
+            }
+        }
     }
 }
 
