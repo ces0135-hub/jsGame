@@ -1,8 +1,8 @@
 let canvas = document.querySelector('#myCanvas');
 let ctx = canvas.getContext('2d');
 
-let ballX = canvas.width/3;  //원의 중심 x 좌표
-let ballY = canvas.width/3;  //원의 중심 y 좌표
+let ballX = 10;  //원의 중심 x 좌표
+let ballY = canvas.height - canvas.height / 2;  //원의 중심 y 좌표
 
 let ballRadius = 10;  //원의 반지름
 
@@ -23,14 +23,14 @@ let downPressed = false;
 
 
 
-let brickColCount = 4;
+let brickColCount = 3;
 let brickRowCount = 2;
 
 let brickPadding = 10;
 let brickHeight = 40;
 let brickWidth = 80;
-let brickOffsetLeft = 30;
-let brickOffsetTop = 30;
+let brickOffsetLeft = 60;
+let brickOffsetTop = 50;
 
 let brickX = 0;
 let brickY = 0;
@@ -73,6 +73,10 @@ function collDec() {
                 if(ballX > curBrick.setBrickX && ballX < curBrick.setBrickX+brickWidth && ballY > curBrick.setBrickY && ballY < curBrick.setBrickY+brickHeight) {
                     dy = -dy;
                     curBrick.status = 0;
+                    statusCnt += 1;
+                    if(statusCnt == brickColCount*brickRowCount) {
+                        gameOver();
+                    }
                 }
             }
         }
@@ -105,54 +109,54 @@ function drawPaddle() {
 
 
 let statusCnt = 0;
-function brokenBrickCnt() {
-    for(var c = 0; c < brickColCount; c++) {
-        for(var r = 0; r < brickRowCount; r++) {
-            if(brick[c][r].status == 0) {  //부서진 brick의 개수
-                statusCnt += 1;
-            }
+let groundTouch = 0;
+
+function groundCnt() {
+    if(ballY+ballRadius > canvas.height) {
+        groundTouch += 1;
+        if(groundTouch == 1) {
+            alert("Touched Ground for " + groundTouch + " Time");
+        }
+        else {
+            alert("Touched Ground for " + groundTouch + " Times");
+        }
+
+        if(groundTouch == 3) {
+            gameOver();
         }
     }
 }
 
-
-let groundTouch = 0;
-function groundCnt() {
-    if(ballY-ballRadius < 0) {
-        groundTouch += 1;
-    }
-}
-
-
 function gameOver() {
-    if(statusCnt == brickColCount*brickRowCount || groundTouch >= 2) {
-        statusCnt = 0;
-        groundTouch = 0;
-        alert("Game Over");
-        document.location.reload();
-        clearInterval(interval);
-    }
+    alert("Game Over");
+    alert("Score: " + statusCnt);
+    document.location.reload();
+    clearInterval(interval);
 }
-
 
 
 
 function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);  //기존의 원 지우기
 
     drawPaddle();  //setInterval로 생성한 간격마다 paddle 생성
     paddleDec();  //paddle에 닿으면 원의 이동 방향이 바뀐다.
 
     drawBall();
     drawBrick();
-    collDec();
+
+    collDec();  //brick과의 충돌 감지
+
     //canvas의 네 면과의 충돌 감지
     if(ballX-ballRadius < 0 || ballX+ballRadius > canvas.width) {  //옆면
         dx = -dx;
     }
-    if(ballY+ballRadius > canvas.height || ballY-ballRadius < 0) {  //윗면, 아랫면
+    if(ballY+ballRadius > canvas.height || ballY-ballRadius < 0) {  //아랫면, 윗면
         dy = -dy;
     }
+
+    //밑면에 닿을 수 있는 횟수 제한
+    groundCnt();
 
     //paddle 동작
     if(rightPressed) {
@@ -182,20 +186,6 @@ function draw() {
 
     ballX += dx;
     ballY += dy;
-
-    brokenBrickCnt();
-    groundCnt();
-
-    if(statusCnt == brickColCount*brickRowCount) {
-        alert("Brick");
-        document.location.reload();
-        clearInterval(interval);
-    } 
-    if(groundTouch >= 2) {
-        alert("ground");
-        document.location.reload();
-        clearInterval(interval);
-    }
 }
 
 document.addEventListener('keydown', keyDownHandler, false);
@@ -225,4 +215,4 @@ function keyUpHandler(e) {
     }
 }
 
-setInterval(draw, 10);
+let interval = setInterval(draw, 10);
