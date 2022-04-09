@@ -1,3 +1,5 @@
+//https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript/Finishing_up
+
 let canvas = document.querySelector('#myCanvas');
 let ctx = canvas.getContext('2d');
 
@@ -11,8 +13,8 @@ let fixedPaddleHeight = 10;
 let paddleWidth = 100;
 let paddleX = (canvas.width-paddleWidth)/2;  //paddle의 시작 위치
 
-let dx = 2;
-let dy = -2;
+let dx = 3;
+let dy = -3;
 
 
 let rightPressed = false;
@@ -21,16 +23,20 @@ let upPressed = false;
 let downPressed = false;
 
 
+let score = 0;
+let lives = 3;
 
 
-let brickColCount = 3;
-let brickRowCount = 2;
+
+
+let brickColCount = 2;
+let brickRowCount = 1;
 
 let brickPadding = 10;
 let brickHeight = 40;
 let brickWidth = 80;
-let brickOffsetLeft = 60;
-let brickOffsetTop = 50;
+let brickOffsetLeft = 90;
+let brickOffsetTop = 80;
 
 let brickX = 0;
 let brickY = 0;
@@ -73,14 +79,23 @@ function collDec() {
                 if(ballX > curBrick.setBrickX && ballX < curBrick.setBrickX+brickWidth && ballY > curBrick.setBrickY && ballY < curBrick.setBrickY+brickHeight) {
                     dy = -dy;
                     curBrick.status = 0;
-                    statusCnt += 1;
-                    if(statusCnt == brickColCount*brickRowCount) {
-                        gameOver();
+                    score++;
+                    if(score == brickColCount*brickRowCount) {
+                        alert("You Win !");
+                        document.location.reload();
+                        clearInterval(interval);
                     }
                 }
             }
         }
     }
+}
+
+
+function drawScore() {
+    ctx.font = "16px Arial";
+    ctx.fillStyle = "#0095DD";
+    ctx.fillText("Score: " + score, 8, 20);  //fillText(text, x coordinate, y coordiante);
 }
 
 
@@ -108,28 +123,25 @@ function drawPaddle() {
 }
 
 
-let statusCnt = 0;
-let groundTouch = 0;
-
-function groundCnt() {
+function groundTouch() {
     if(ballY+ballRadius > canvas.height) {
-        groundTouch += 1;
-        if(groundTouch == 1) {
-            alert("Touched Ground for " + groundTouch + " Time");
-        }
-        else {
-            alert("Touched Ground for " + groundTouch + " Times");
-        }
-
-        if(groundTouch == 3) {
+        lives--;
+        if(!lives) {
             gameOver();
         }
     }
 }
 
+
+function drawLives() {
+    ctx.font = "16px Arial";
+    ctx.fillStyle = "#0095DD";
+    ctx.fillText("Lives: " + lives, canvas.width-65, 20);
+}
+
+
 function gameOver() {
-    alert("Game Over");
-    alert("Score: " + statusCnt);
+    alert("Game Over, Score: " + score);
     document.location.reload();
     clearInterval(interval);
 }
@@ -145,6 +157,9 @@ function draw() {
     drawBall();
     drawBrick();
 
+    drawScore();
+    drawLives();
+
     collDec();  //brick과의 충돌 감지
 
     //canvas의 네 면과의 충돌 감지
@@ -156,7 +171,7 @@ function draw() {
     }
 
     //밑면에 닿을 수 있는 횟수 제한
-    groundCnt();
+    groundTouch();
 
     //paddle 동작
     if(rightPressed) {
@@ -186,6 +201,8 @@ function draw() {
 
     ballX += dx;
     ballY += dy;
+
+    requestAnimationFrame(draw);  //더 깔끔한 animation
 }
 
 document.addEventListener('keydown', keyDownHandler, false);
@@ -215,4 +232,14 @@ function keyUpHandler(e) {
     }
 }
 
-let interval = setInterval(draw, 10);
+document.addEventListener("mousemove", MouseMoveHandler, false);
+
+function MouseMoveHandler(e) {
+    let relativeX = e.clientX - canvas.offsetLeft;
+    if(relativeX > 0 && relativeX < canvas.width) {
+        paddleX = relativeX - paddleWidth/2;
+    }
+}
+
+//let interval = setInterval(draw, 10);
+draw();
