@@ -29,8 +29,8 @@ let lives = 3;
 
 
 
-let brickColCount = 2;
-let brickRowCount = 1;
+let brickColCount = 4;
+let brickRowCount = 2;
 
 let brickPadding = 10;
 let brickHeight = 40;
@@ -71,6 +71,11 @@ function drawBrick() {
 }
 
 
+let getItemId = 0;
+function getRandomNum() {
+    getItemId = Math.floor(Math.random()*10 + 1);
+}
+
 function collDec() {
     for(var c = 0; c < brickColCount; c++) {
         for(var r = 0; r < brickRowCount; r++) {
@@ -80,6 +85,18 @@ function collDec() {
                     dy = -dy;
                     curBrick.status = 0;
                     score++;
+                    
+                    getRandomNum();
+                    alert(getItemId);
+                    if(getItemId == 1) {
+                        alert("new item");
+                        //dx += 3;
+                    }
+                    else if(getItemId == 2) {
+                        //dy += 3;
+                        alert("new item");
+                    }
+
                     if(score == brickColCount*brickRowCount) {
                         alert("You Win !");
                         document.location.reload();
@@ -90,6 +107,7 @@ function collDec() {
         }
     }
 }
+
 
 
 function drawScore() {
