@@ -1,5 +1,6 @@
 canvas {
-    background: #eee;
+    background: #C9FACF;
     display: block;
-    margin: 0 auto; /*위, 아래의 margin = 0, 가로 중앙에 배치*/
+    /*margin: 0 auto;*/ /*위, 아래의 margin = 0, 가로 중앙에 배치*/
+    margin:  150px auto;
 }
